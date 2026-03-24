@@ -1,0 +1,17 @@
+{
+  "name": "ultimate-code-review",
+  "version": "1.0.0",
+  "description": "Deep code review with 22+ specialist Opus agents. Full call-graph tracing, web-verified findings, adversarial false-positive filtering. Supports GitHub PRs, GitLab MRs, and local branch comparisons.",
+  "author": {
+    "name": "Brad Windy"
+  },
+  "license": "MIT",
+  "keywords": [
+    "code-review",
+    "agent-team",
+    "security",
+    "performance",
+    "testing",
+    "opus"
+  ]
+}
