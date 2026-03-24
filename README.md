@@ -2,9 +2,17 @@
 
 Deep code review plugin for Claude Code. Spawns a 22-agent team to review PRs, MRs, or branch comparisons.
 
+## Quick Start
+
+```
+/plugin marketplace add bradwindy/ultimate-code-review
+/plugin install ultimate-code-review@ultimate-code-review
+/ultimate-code-review https://github.com/org/repo/pull/123
+```
+
 ## Requirements
 
-- Claude Code v2.1.80+
+- Claude Code v1.0.33+
 - Opus model access (Pro plan or higher)
 - Agent teams enabled: `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`
 - `gh` CLI (for GitHub PRs)
@@ -13,14 +21,21 @@ Deep code review plugin for Claude Code. Spawns a 22-agent team to review PRs, M
 
 ## Installation
 
+### From Marketplace (recommended)
+
 ```bash
-claude plugin add /path/to/ultimate-code-review
+# Add the marketplace
+/plugin marketplace add bradwindy/ultimate-code-review
+
+# Install the plugin
+/plugin install ultimate-code-review@ultimate-code-review
 ```
 
-Or from GitHub:
+### Local Development
 
 ```bash
-claude plugin add owner/ultimate-code-review
+git clone git@github.com:bradwindy/ultimate-code-review.git
+claude --plugin-dir ./ultimate-code-review
 ```
 
 ## Usage
@@ -66,4 +81,8 @@ All agents verify technical claims against the web. No reliance on internal know
 
 ## Cost
 
-This plugin uses 22+ Opus agents at max effort. Expect significant token usage ($5-50+ per review depending on diff size). This is by design - depth over economy.
+This plugin uses 22+ Opus agents at max effort. Expect significant token usage ($5-50+ per review depending on diff size). This is by design -- depth over economy.
+
+## License
+
+MIT -- see [LICENSE](LICENSE) for details.
