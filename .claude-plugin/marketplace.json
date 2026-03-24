@@ -4,14 +4,14 @@
     "name": "Brad Windy"
   },
   "metadata": {
-    "description": "Deep code review with 22+ specialist Opus agents",
-    "version": "1.0.0"
+    "description": "Deep code review with 23+ specialist Opus agents",
+    "version": "1.1.0"
   },
   "plugins": [
     {
       "name": "ultimate-code-review",
       "source": "./",
-      "description": "Deep code review with 22+ specialist Opus agents. Full call-graph tracing, web-verified findings, adversarial false-positive filtering. Supports GitHub PRs, GitLab MRs, and local branch comparisons.",
+      "description": "Deep code review with 23+ specialist Opus agents. Full call-graph tracing, web-verified findings, adversarial false-positive filtering. Supports GitHub PRs, GitLab MRs, and local branch comparisons.",
       "category": "code-quality",
       "tags": ["code-review", "agent-team", "security", "performance", "opus"]
     }

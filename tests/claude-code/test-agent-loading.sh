@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Fast test (~5 min): Verify all 24 agents load correctly
+# Fast test (~5 min): Verify all 25 agents load correctly
 # Tests that each agent acknowledges its role when prompted
 
 set -euo pipefail
 source "$(dirname "$0")/test-helpers.sh"
 
-echo "Testing agent loading (24 agents)..."
+echo "Testing agent loading (25 agents)..."
 echo ""
 
 AGENTS=(
@@ -31,6 +31,7 @@ AGENTS=(
     "architecture-boundary"
     "logging-observability"
     "migration-deployment-risk"
+    "scope-relevance-reviewer"
     "synthesizer"
     "devils-advocate"
 )

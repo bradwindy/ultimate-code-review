@@ -1,6 +1,6 @@
 # Ultimate Code Review
 
-Deep code review plugin for Claude Code. Spawns a 22-agent team to review PRs, MRs, or branch comparisons.
+Deep code review plugin for Claude Code. Spawns a 23-agent team to review PRs, MRs, or branch comparisons.
 
 ## Quick Start
 
@@ -62,26 +62,26 @@ claude --plugin-dir ./ultimate-code-review
 Three-phase review:
 
 1. **Context Gathering**: Team lead collects diff, builds change manifest
-2. **Deep Analysis**: 22 specialist agents review in parallel (all Opus, max effort)
+2. **Deep Analysis**: 23 specialist agents review in parallel (all Opus, max effort)
 3. **Synthesis**: Findings merged, then adversarially challenged by devil's advocate
 
 All agents verify technical claims against the web. No reliance on internal knowledge.
 
 ## Agents
 
-22 specialist agents with non-overlapping scopes:
+23 specialist agents with non-overlapping scopes:
 
 **Bug-Focused (1-7):** Deep Bug Scanner, Side Effects Analyzer, Concurrency Reviewer, Silent Failure Hunter, Data Flow Analyzer, Memory & Resource Analyzer, Performance Analyzer
 
 **Security & Types (8-10):** Security Auditor, Type Design Reviewer, API Contract Reviewer
 
-**Context & Quality (11-22):** Git History Analyzer, Cross-PR Learning Agent, Guidelines Compliance, Comment Compliance Checker, Comment Quality Reviewer, Dependency Analyzer, Code Simplification, Style Consistency, Test Coverage Analyzer, Architecture Boundary, Logging & Observability, Migration & Deployment Risk
+**Context & Quality (11-23):** Git History Analyzer, Cross-PR Learning Agent, Guidelines Compliance, Comment Compliance Checker, Comment Quality Reviewer, Dependency Analyzer, Code Simplification, Style Consistency, Test Coverage Analyzer, Architecture Boundary, Logging & Observability, Migration & Deployment Risk, Scope Relevance Reviewer
 
-**Synthesis (23-24):** Synthesizer, Devil's Advocate
+**Synthesis (24-25):** Synthesizer, Devil's Advocate
 
 ## Cost
 
-This plugin uses 22+ Opus agents at max effort. Expect significant token usage ($5-50+ per review depending on diff size). This is by design -- depth over economy.
+This plugin uses 23+ Opus agents at max effort. Expect significant token usage ($5-50+ per review depending on diff size). This is by design -- depth over economy.
 
 ## License
 

@@ -1,15 +1,15 @@
 ---
 name: synthesizer
 description: |
-  Use this agent to merge and deduplicate findings from all 22 specialist agents into a
+  Use this agent to merge and deduplicate findings from all 23 specialist agents into a
   unified report with normalized severity, conflict resolution, and executive summary.
 
   <example>
-  Context: 22 specialist agents have completed their reviews.
+  Context: 23 specialist agents have completed their reviews.
   user: "Synthesize all review findings"
   assistant: "I'll use the synthesizer to merge, deduplicate, and organize all findings."
   <commentary>
-  22 agents may flag the same issue from different angles - the synthesizer resolves this.
+  23 agents may flag the same issue from different angles - the synthesizer resolves this.
   </commentary>
   </example>
 model: opus
@@ -24,7 +24,7 @@ You merge all specialist agent reports into a single, coherent review. Your miss
 
 ## Input
 
-You receive findings from up to 22 specialist agents. Some agents may have timed out (their findings will be missing). You will be told which agents completed and which didn't.
+You receive findings from up to 23 specialist agents. Some agents may have timed out (their findings will be missing). You will be told which agents completed and which didn't.
 
 ## Synthesis Process
 
@@ -105,7 +105,7 @@ If any finding is missing required fields, include it in a "Malformed Findings" 
 
 ## Executive Summary
 - **Overall Assessment**: [merge-ready / needs-work / high-risk]
-- **Agents Completed**: X/22
+- **Agents Completed**: X/23
 - **Total Findings**: X CRITICAL, X HIGH, X MEDIUM, X LOW, X INFO
 - **Key Risk Areas**: [top 3 files/modules by finding count]
 
@@ -152,5 +152,5 @@ If any finding is missing required fields, include it in a "Malformed Findings" 
 
 ## Graceful Degradation
 
-If fewer than 22 reports received, synthesize what's available and note the gaps prominently.
+If fewer than 23 reports received, synthesize what's available and note the gaps prominently.
 If a report has malformed output, include its raw text in the Malformed Findings section.

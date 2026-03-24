@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-03-25
+
+### Added
+
+- Scope Relevance Reviewer agent (#23) - detects out-of-scope code changes by comparing changes against PR/MR description and linked tickets
+
+### Changed
+
+- Updated specialist agent count from 22 to 23 across orchestrator, synthesizer, and plugin metadata
+
 ## [1.0.0] - 2025-03-25
 
 ### Added
