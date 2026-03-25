@@ -46,6 +46,7 @@ Collect the following information:
 4. **Project guidelines**: Search for and read:
    - Root `CLAUDE.md` (if exists)
    - Any `CLAUDE.md` in directories containing changed files
+   - Root `REVIEW.md` (if exists) -- review-specific guidance per Anthropic convention
    - `.editorconfig` (if exists)
 5. **Project structure**: Read `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `Gemfile`, `build.gradle`, `pom.xml`, or similar config files to identify the tech stack
 6. **File count classification**:
@@ -56,7 +57,7 @@ Collect the following information:
 Write the manifest summary to a temporary file at `$TMPDIR/ucr-manifest.md` containing:
 - File list with change types
 - Tech stack summary
-- Guidelines summary
+- Guidelines summary (including any REVIEW.md rules)
 - Diff size classification
 - The diff content (for small/medium diffs) or file list only (for large diffs)
 
