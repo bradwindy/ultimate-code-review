@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-04-14
+
+### Changed
+
+- Replaced Phase 2 active polling loop with event-driven notification processing
+- Startup verification (Step 6a) now uses short-lived polling (~3 min) only to confirm agents launched
+- Completion waiting (Step 6c) is now fully passive — orchestrator goes idle and processes framework notifications
+- Reduced timeout recovery to a single 10-minute safety-net cron with one 5-minute extension
+
+### Removed
+
+- Continuous TaskList() polling loop (45+ calls per review)
+- Status check messages to agents mid-turn (agents cannot respond mid-turn)
+- Web verification compliance reminders (already in agent prompts)
+- Multi-stage timeout extension cascades
+
 ## [1.3.0] - 2026-03-26
 
 ### Added

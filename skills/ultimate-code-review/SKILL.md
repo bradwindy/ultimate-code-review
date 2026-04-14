@@ -136,78 +136,60 @@ For each agent, the prompt should include:
 
 ## Phase 2: Monitor and Wait
 
-After spawning all 23 agents, you MUST actively monitor their progress and wait for ALL of them to complete. Do NOT proceed to Phase 3 until all 23 specialist agent tasks have status `completed`. There is no shortcut past this requirement.
+After spawning all 23 agents, you MUST wait for ALL of them to complete before proceeding to Phase 3. There is no shortcut past this requirement.
 
-### Step 6a: Active Polling Loop
+**How the framework delivers notifications:** Messages from teammates (including task completion notifications and idle notifications) are delivered to you as new conversation turns. You can only receive these when you are idle — not mid-turn. Therefore, you MUST NOT run a continuous polling loop. Instead, confirm agents have launched, then end your turn and let the framework deliver notifications to you naturally.
 
-Execute the following loop. You MUST call `TaskList()` repeatedly — do NOT proceed after a single check.
+### Step 6a: Startup Verification (Active, Short-Lived)
 
-1. Set `checks_done = 0` and `max_checks = 45` (each cycle ~20 seconds = ~15 minutes total)
-2. Call `TaskList()` to get the current status of all specialist agent tasks
-3. Count how many tasks have status `completed` vs `in_progress` vs `pending`
-4. **If ALL 23 specialist agent tasks are `completed`**: exit the loop and proceed to Step 6d (Pre-Synthesis Verification Gate)
-5. **If `checks_done >= max_checks`**: proceed to Step 6c (Timeout Recovery) — do NOT proceed to Phase 3
-6. Otherwise, increment `checks_done` and continue the loop from step 2
+Immediately after spawning all 23 agents, verify that every agent successfully started. Agents that fail to spawn leave their tasks in `pending` state indefinitely — this is the primary failure mode (typically 1-2 agents per session).
 
-Between checks, process any incoming messages from agents. Agents may send you cross-boundary findings or status updates. Read and acknowledge these before the next TaskList check.
+1. Call `TaskList()` once to establish the initial baseline. Note how many tasks are `pending`, `in_progress`, and `completed`.
+2. Wait approximately 45 seconds, then call `TaskList()` again.
+3. Repeat for a maximum of 4 checks (~3 minutes total). On each check, evaluate:
+   - **All 23 tasks are `in_progress` or `completed`**: All agents launched successfully. Log "All 23 agents confirmed running." Proceed to Step 6b.
+   - **Some tasks are still `pending` but fewer than 4 checks have been done**: Continue checking. Log "X/23 started, Y still pending."
+   - **Any task is still `pending` after 4 checks (~3 minutes)**: That agent failed to launch. Apply the failed-to-launch recovery below, then continue startup verification for any remaining pending tasks.
 
-### Step 6b: Periodic Agent Monitoring
+#### Failed-to-launch recovery
 
-Every 5 checks (approximately every 100 seconds), perform the following:
+For each agent whose task is still `pending` after ~3 minutes:
 
-#### 1. Failed-to-launch detection (CRITICAL)
-
-Check if any agent's task is still `pending`. An agent whose task remains `pending` after 15 checks (~5 minutes) never started — it failed to spawn or initialize. This is the primary failure mode (typically affects 1-2 agents per session).
-
-**Action for failed-to-launch agents:**
 1. Log which agent failed to start and its review domain
 2. Kill the failed agent
 3. Spawn a fresh replacement agent with the exact same task assignment, manifest, and instructions
 4. Create a new task for the replacement and track it in your completion count
 5. The replacement starts fresh — it does not inherit state from the failed agent
 
-#### 2. Status checks for active agents
+After replacing failed agents, do one more `TaskList()` check to confirm the replacements have started (`in_progress`). If a replacement also fails to start, replace it again. Once all tasks are `in_progress` or `completed`, proceed to Step 6b.
 
-If any agent's task has been `in_progress` for 5 or more consecutive checks, send a non-urgent status check:
-```
-SendMessage(to: "<agent-name>", message: "Status check: please report your progress when you finish your current step. Take as long as you need for thorough analysis.")
-```
+### Step 6b: Set Safety-Net Timeout
 
-**Agents mid-turn cannot respond to messages.** When an agent is executing tool calls (bash commands, web searches, file reads), incoming messages queue in its inbox and are only processed when the current turn ends. An agent doing a 15-minute deep call-graph trace looks identical to a crashed agent — both are silent. Do NOT interpret silence as a failure. The task status (`in_progress` vs `pending`) is the only reliable signal.
+Before going idle, set a one-shot safety-net timeout. This catches the rare case where an agent crashes mid-work (task stuck `in_progress` forever) and never sends a completion notification.
 
-Some agents legitimately take much longer than others. Deep-bug-scanner traces full call graphs. Security-auditor verifies CVEs against the web. Performance-analyzer researches framework-specific patterns. These agents may run for 15-20 minutes. A thorough agent is a good agent. Do NOT rush or kill active agents based on duration alone.
+1. Run `date -v+10M +"%M %H %d %m"` to compute the cron expression for 10 minutes from now.
+2. Create a one-shot cron job:
+   ```
+   CronCreate(cron: "<computed minute> <computed hour> <computed day> <computed month> *", recurring: false, prompt: "SAFETY-NET TIMEOUT: Call TaskList() and check if all 23 specialist agent tasks are completed. If yes, proceed to the Pre-Synthesis Verification Gate (Step 6d). If any tasks are still pending, kill and replace those agents immediately. If any tasks are still in_progress, do NOT kill them — create one final 5-minute safety-net cron and wait. If that final cron also fires with agents still in_progress, record the missing review domains and proceed to Phase 3 with available results, passing the missing domain list to the synthesizer for coverage gap reporting.")
+   ```
+3. Store the returned job ID — you will cancel it with `CronDelete` when all agents complete normally.
 
-#### 3. Web verification compliance
+### Step 6c: Passive Completion Waiting (Event-Driven)
 
-If any agent's messages or findings contain no web verification URLs or references to WebSearch/WebFetch usage, send a reminder:
-```
-SendMessage(to: "<agent-name>", message: "REMINDER: The web verification mandate requires you to verify all technical claims using WebSearch and WebFetch against official documentation. Search for official sources before finalizing your findings. Mark any unverified claims as UNVERIFIED.")
-```
+All agents are confirmed running and the safety-net timeout is set. Now wait for agents to complete. **Do NOT poll in a loop.** The framework delivers notifications to you automatically when teammates finish.
 
-#### 4. Progress logging
+1. **End your turn and go idle.** Stop calling tools. Do not call `TaskList()` repeatedly. Do not send status check messages to agents (they cannot respond mid-turn). Do not send web verification reminders (agents already have the mandate in their prompts). Let agents work without interruption.
 
-After each monitoring cycle, note the status: "X/23 agents completed, Y in progress, Z pending. [List any agents replaced due to failed-to-launch.]"
+2. **Process notifications as they arrive.** When a teammate agent completes its task or goes idle, the framework delivers a notification to you as a new conversation turn. On each notification:
+   a. Call `TaskList()` once to get the current status of all tasks.
+   b. Count completed vs in_progress vs pending.
+   c. Log the progress: "X/23 agents completed, Y in progress."
+   d. **If ALL 23 specialist agent tasks are `completed`**: cancel the safety-net cron with `CronDelete(<stored job ID>)`, then proceed to Step 6d (Pre-Synthesis Verification Gate).
+   e. **If not all complete**: end your turn and return to idle. Wait for the next notification.
 
-### Step 6c: Timeout Recovery
+3. **Cross-boundary messages.** Some agents send cross-boundary findings to other agents (e.g., deep-bug-scanner notifying security-auditor of a vulnerability). These are agent-to-agent and do not require your intervention. If an agent sends you a message, acknowledge it and return to idle.
 
-When the polling loop reaches `max_checks` (45) without all 23 agents completing, do NOT proceed to Phase 3. Instead, investigate and recover:
-
-1. **Check each incomplete agent's task status:**
-   - Task still `pending`: the agent never started. Kill and replace immediately (same procedure as Step 6b failed-to-launch detection).
-   - Task `in_progress`: the agent is working. Do NOT kill it.
-
-2. **Extend the polling loop** by 15 more checks (~5 more minutes) to allow active agents to finish. Continue monitoring per Step 6b during this extension.
-
-3. **If the extended window also expires** with agents still `in_progress`:
-   - If only 1-2 agents remain and all others (21-22) have completed, apply late-straggler recovery:
-     1. Send a final status check message to the remaining agent(s)
-     2. Wait 3 more polling cycles (~60 seconds)
-     3. If still no response and task still `in_progress`: kill and spawn a replacement
-   - If 3+ agents are still `in_progress`, extend polling by another 10 checks (~3 more minutes). Multiple agents still working likely indicates a legitimately large review.
-
-4. **Absolute last resort** (after ~25 minutes total with recovery attempts): if agents still have not completed despite replacements and extended polling, record which review domains are missing and proceed to Phase 3 with available results. Pass the missing domain list to the synthesizer for coverage gap reporting.
-
-This last-resort path should be extremely rare. The failed-to-launch detection in Step 6b should catch the primary problem (agents that never started) within the first 5 minutes.
+**Key principle:** Between notifications, you are idle. This is correct. An idle orchestrator can receive messages. A polling orchestrator cannot. Do NOT add a polling loop here — it will block message delivery and cause the same flakiness this design is intended to fix.
 
 ### Step 6d: Pre-Synthesis Verification Gate
 
@@ -219,7 +201,7 @@ Before proceeding to Phase 3, you MUST complete this verification. Do not skip i
    - [ ] Every review domain is covered (cross-reference the 23 domains: deep-bug-scanner, security-auditor, data-flow-analyzer, side-effects-analyzer, silent-failure-hunter, concurrency-reviewer, memory-resource-analyzer, performance-analyzer, type-design-reviewer, api-contract-reviewer, architecture-boundary, dependency-import-analyzer, test-coverage-analyzer, code-simplification, style-consistency, comment-quality-reviewer, comment-compliance-checker, guidelines-compliance, logging-observability, migration-deployment-risk, git-history-analyzer, scope-relevance-reviewer, cross-pr-learning-agent)
    - [ ] No replacement agents are still `in_progress` or `pending`
    - [ ] If any agents were killed and replaced, their replacements show `completed`
-3. **If ANY check fails**: DO NOT proceed to Phase 3. Return to the polling loop and resolve the gap.
+3. **If ANY check fails**: DO NOT proceed to Phase 3. Return to Step 6c and wait for the remaining agents to complete.
 4. **If ALL checks pass**: proceed to Phase 3.
 
 ## Phase 3: Synthesis
