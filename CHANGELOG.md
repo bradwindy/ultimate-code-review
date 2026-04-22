@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-04-22
+
+### Changed
+
+- Phase 2 simplified to passive waiting — main agent ends turn after spawning 23 agents and takes no action until all return
+- Synthesizer and devil's advocate phases unchanged but no longer gated behind monitoring checks
+
+### Removed
+
+- Startup verification polling (Step 6a) — no TaskList() calls after spawn
+- Safety-net timeout CronCreate (Step 6b) — no timeout monitoring
+- Passive monitoring with progress logging (Step 6c) — no progress tracking
+- Pre-synthesis verification gate (Step 6d) — no gate checks
+- Agent kill-and-replace logic for failed-to-launch agents
+- Non-negotiable rules about slow agents and pre-phase-transition checklists
+
 ## [1.5.0] - 2026-04-14
 
 ### Changed
